@@ -1,7 +1,7 @@
 ;; author: Mark W. Naylor
-;; file:  register.clj
+;; file:  base_register.clj
 ;; date:  2019-Jun-07
-(ns sham.register
+(ns sham.base-register
   (:refer-clojure :exclude [name])
   (:require [sham.register.impl :as impl])
   (:import [sham.register.impl Register])
@@ -16,7 +16,7 @@
 (def ^:private register-names
   (list "nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr"))
 
-(def ^:private registers-by-names
+(def ^:private registers-by-name
   (zipmap register-names (range (count register-names))))
 
 (def ^:private registers-by-code
@@ -58,7 +58,7 @@
   "Register code equivalent to its name."
   [^String name]
   {:pre [(string? name)]}
-  (registers-by-names name))
+  (registers-by-name name))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

@@ -1,13 +1,34 @@
 ;; author: Mark W. Naylor
 ;; file:  impl.clj
 ;; date:  2019-Jun-16
-(ns sham.register.impl)
+(ns sham.register.impl
+  (:use [clojure.string :only [lower-case]]))
 
 (defrecord RegisterName [^String value])
+(defn register-name
+  "Constructor for RegisterName."
+  [^String value]
+  {:pre [(string? value)]}
+  (-> value lower-case ->RegisterName))
 
 (defrecord RegisterCode [^Number value])
+(defn register-code
+  "Constructor for RegisterCode"
+  [^Number value]
+  {:pre [(number? value)]}
+  (->RegisterCode value))
 
 (defrecord Register [^Short value])
+(defn register
+  "Constructor for Register."
+  [n]
+  {:pre [(number? n)]}
+  (->Register (unchecked-short n)))
+
+(defn register?
+  "Is r a Register?"
+  [r]
+  (= Register (type r)))
 
 (defprotocol RegisterOps
   (add [^Register r1 ^Register r2])
@@ -19,10 +40,10 @@
 (extend-type Register
   RegisterOps
 
-  (add [r1 r2] (->Register (+' (:value r1) (:value r2))))
-  (sub [r1 r2] (->Register (-' (:value r1) (:value r2))))
-  (mul [r1 r2] (->Register (*' (:value r1) (:value r2))))
-  (div [r1 r2] (->Register (short (/ (:value r1) (:value r2))))))
+  (add [r1 r2] (register (+' (:value r1) (:value r2))))
+  (sub [r1 r2] (register (-' (:value r1) (:value r2))))
+  (mul [r1 r2] (register (*' (:value r1) (:value r2))))
+  (div [r1 r2] (register (/ (:value r1) (:value r2)))))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

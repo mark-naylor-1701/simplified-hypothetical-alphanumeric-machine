@@ -1,6 +1,6 @@
 (ns sham.core
   (:gen-class)
-  (:require [sham.register :refer [register add sub mul div
+  (:require [sham.base-register :refer [register add sub mul div
                                    ]])
   )
 
