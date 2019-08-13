@@ -2,63 +2,107 @@
 ;; file:  base_register.clj
 ;; date:  2019-Jun-07
 (ns sham.base-register
-  (:refer-clojure :exclude [name])
-  (:require [sham.register.impl :as impl])
-  (:import [sham.register.impl Register])
+  (:refer-clojure :exclude [name peek compare])
+  (:require sham.register-items)
+  (:refer sham.register-items :only [register-name register-code] )
+
+  (:require sham.register.impl)
+  (:refer sham.register.impl :only [register registers peek poke])
   )
 
-;; Exposes the register binary operations from impl.
-(def add impl/add)
-(def sub impl/sub)
-(def mul impl/mul)
-(def div impl/div)
+(def ^:private Register
+  "Alias the \"type name\", hiding implementation details."
+  :sham.register.impl/Register)
 
-(def ^:private register-names
-  (list "nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr"))
+;;(def ^:private register-names  (map register-name (list "nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr")))
 
-(def ^:private registers-by-name
-  (zipmap register-names (range (count register-names))))
+(def ^:private register-names ["nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr"])
 
-(def ^:private registers-by-code
-  (zipmap (range (count register-names)) register-names))
+(def ^:private max-rand (Math/pow 2 16))
 
-(defn register-name
-  "Constructor for RegisterName."
-  [^String value]
-  {:pre [(string? value)]}
-  (impl/->RegisterName value))
-
-(defn register-code
-  "Constructor for RegisterCode"
-  [^Number value]
-  {:pre [(number? value)]}
-  (impl/->RegisterCode value))
-
-(defn register
-  "Constructor for Register."
-  [n]
-  {:pre [(number? n)]}
-  (impl/->Register (unchecked-short n)))
-
-(defn register?
-  "Is r a Register?"
-  [r]
-  (= Register (type r)))
-
-(def registers (vec (repeat (count register-names) (register 0))))
+(defn- _rand
+  ""
+  []
+  (register (rand-int max-rand)))
 
 
-(defn name
-  "Regiser name equivalent to its code."
-  [^Short code]
-  {:pre [(number? code)]}
-  (registers-by-code (short code)))
+;; (def ^:private registers-by-name
+;;   (zipmap register-names (map register-code (range (count register-names)))))
 
-(defn code
-  "Register code equivalent to its name."
-  [^String name]
-  {:pre [(string? name)]}
-  (registers-by-name name))
+;; (def ^:private registers-by-code
+;;   (zipmap (map register-code (range (count register-names))) register-names))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;          Forward declations
+(declare ^:private check-fn)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;(def registers (vec (repeat (count register-names) (register 0))))
+(def sham-registers (registers register-names))
+
+(defmulti plus "Add either a number or register to register."  check-fn)
+
+(defmethod plus [Register Number] [r1 r2]
+  (register (+' (:value r1) r2)))
+
+(defmethod plus [Register Register] [r1 r2]
+  (register (apply +' (map :value [r1 r2]))))
+
+(defmulti minus "Subtract either a number or register to register."  check-fn)
+
+(defmethod minus [Register Number] [r1 r2]
+  (register (-' (:value r1) r2)))
+
+(defmethod minus [Register Register] [r1 r2]
+  (register (apply -' (map :value [r1 r2]))))
+
+(defmulti times "Muliply either a number or register to register."  check-fn)
+
+(defmethod times [Register Number] [r1 r2]
+  (register (*' (:value r1) r2)))
+
+(defmethod times [Register Register] [r1 r2]
+  (register (apply *' (map :value [r1 r2]))))
+
+(defmulti divided-by "Divide either a number or register to register."  check-fn)
+
+(defmethod divided-by [Register Number] [r1 r2]
+  (register (/ (:value r1) r2)))
+
+(defmethod divided-by [Register Register] [r1 r2]
+  (register (apply / (map :value [r1 r2]))))
+
+(defmulti neg "Negate (* -1) either a register or number?" type)
+
+(defmethod neg Register [r]
+  (register (* -1 (:value r))))
+
+(defmulti add-1 "Increment a register" type)
+
+(defmethod add-1  Register [r]
+  (plus r 1))
+
+(defmulti sub-1 "Increment a register" type)
+
+(defmethod sub-1 Register [r]
+  (minus r 1))
+
+(defmulti compare "Compares two registers or a register and a number" check-fn)
+
+(defmethod compare [Register Number] [r1 r2]
+  (register (clojure.core/compare (:value r1) r2)))
+
+(defmethod compare [Register Register] [r1 r2]
+  (register (apply clojure.core/compare (map :value [r1 r2]))))
+
+
+(defn- check-fn
+  ""
+  [p1 p2]
+  [(type p1) (if (number? p2)
+               Number
+               (type p2))])
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

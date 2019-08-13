@@ -1,55 +1,19 @@
 ;; author: Mark W. Naylor
-;; file:  impl.clj
-;; date:  2019-Jun-16
-(ns sham.register.impl
-  (:refer-clojure :exclude [peek])
-  (:use [clojure.string :only [lower-case]])
-  (:use [sham.util :only [atom?]]))
+;; file:  util.clj
+;; date:  2019-Aug-12
+;; author: Mark W. Naylor
+;; file:  util.clj
+;; date:  2019-Aug-10
+
+(ns sham.util)
 
 
-(defn register
-  "Constructor for Register."
-  [n]
-  {:pre [(number? n)]}
-  (with-meta {:value (unchecked-short n)} {:type ::Register}))
 
-(defn register?
-  "Is r a Register?"
-  [r]
-  (= ::Register (type r)))
-
-(defn registers
-  "Constructor for a bank of registers."
-  [spec]
-  {:pre [(or (number? spec)
-             (and (coll? spec)
-                  (every? string? spec)))]}
-  (let [n (if (coll? spec)
-            (count spec)
-            spec)]
-    (atom (vec (repeat n (register 0))))))
-
-(defn- register-bank?
+(defn atom?
   ""
   [x]
-  (and (atom? x)
-       (coll? (deref x))
-       (every? register? (deref x))))
+  (= (class x) clojure.lang.Atom))
 
-(defn peek
-  "Get a selected register"
-  [obj idx]
-  {:pre [(register-bank? obj)
-         (number? idx)]}
-  ((deref obj) idx))
-
-(defn poke
-  "Set a selected register"
-  [obj idx reg]
-  {:pre [(register-bank? obj)
-         (number? idx)
-         (register? reg)]}
-  (swap! obj assoc idx reg))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

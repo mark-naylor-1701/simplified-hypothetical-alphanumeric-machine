@@ -1,55 +1,70 @@
 ;; author: Mark W. Naylor
-;; file:  impl.clj
-;; date:  2019-Jun-16
-(ns sham.register.impl
-  (:refer-clojure :exclude [peek])
-  (:use [clojure.string :only [lower-case]])
+;; file:  memory.clj
+;; date:  2019-Aug-12
+
+(ns sham.memory
   (:use [sham.util :only [atom?]]))
 
+(defn memory
+  ""
+  [size-in-bytes]
+  {:pre [(number? size-in-bytes)]}
+  (atom (vec (repeat size-in-bytes (byte 0)))))
 
-(defn register
-  "Constructor for Register."
-  [n]
-  {:pre [(number? n)]}
-  (with-meta {:value (unchecked-short n)} {:type ::Register}))
+(defn- byte?
+  ""
+  [x]
+  (= Byte (class x)))
 
-(defn register?
-  "Is r a Register?"
-  [r]
-  (= ::Register (type r)))
 
-(defn registers
-  "Constructor for a bank of registers."
-  [spec]
-  {:pre [(or (number? spec)
-             (and (coll? spec)
-                  (every? string? spec)))]}
-  (let [n (if (coll? spec)
-            (count spec)
-            spec)]
-    (atom (vec (repeat n (register 0))))))
-
-(defn- register-bank?
+(defn- memory-bank?
   ""
   [x]
   (and (atom? x)
-       (coll? (deref x))
-       (every? register? (deref x))))
+       (every? byte? (deref x))))
 
-(defn peek
-  "Get a selected register"
+
+(defn peek-byte
+  ""
   [obj idx]
-  {:pre [(register-bank? obj)
-         (number? idx)]}
+  {:pre [(memory-bank? obj)
+         (number? idx)
+         (< -1 idx (count (deref obj)))]}
   ((deref obj) idx))
 
-(defn poke
-  "Set a selected register"
-  [obj idx reg]
-  {:pre [(register-bank? obj)
+(defn poke-byte
+  ""
+  [obj idx n]
+  {:pre [(memory-bank? obj)
          (number? idx)
-         (register? reg)]}
-  (swap! obj assoc idx reg))
+         (number? n)
+         (< -1 idx (count (deref obj)))]}
+  (swap! obj assoc idx (unchecked-byte n)))
+
+(defn peek-word
+  ""
+  [obj idx]
+  {:pre [(memory-bank? obj)
+         (number? idx)
+         (>= idx 0)
+         (< (inc idx) (count (deref obj)))]}
+  (let [dobj (deref obj)]
+    (bit-or
+     (bit-shift-left (dobj idx) 8)
+     (dobj (inc idx)))))
+
+(defn poke-word
+  ""
+  [obj idx n]
+  {:pre [(memory-bank? obj)
+         (number? idx)
+         (number? n)
+         (< -1 idx (count (deref obj)))]}
+  (let [idx+ (inc idx)
+        lo (unchecked-byte n)
+        hi (unchecked-byte (bit-shift-right (unchecked-short n) 8))]
+    (swap! obj assoc idx hi)
+    (swap! obj assoc idx+ lo)))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License
