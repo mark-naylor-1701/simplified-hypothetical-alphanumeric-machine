@@ -5,15 +5,24 @@
 ;; file:  util.clj
 ;; date:  2019-Aug-10
 
-(ns sham.util)
-
-
+(ns sham.util
+  (:refer clojure.string :only [lower-case]))
 
 (defn atom?
-  ""
+  "Is x an instance of Atom?"
   [x]
   (= (class x) clojure.lang.Atom))
 
+(defn code
+  "Finds a given name in a given collection, returns its code/index,
+  if it exists as a byte. Throws an exception identifying the kind."
+  [coll kind name]
+  {:pre [(coll? coll) (string? kind) (string? name)]}
+  (let [idx (.indexOf coll (lower-case name))]
+    (if (> idx -1)
+        (byte idx)
+        (throw (java.lang.IllegalArgumentException.
+                (str "No such " kind " '" name "'"))))))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

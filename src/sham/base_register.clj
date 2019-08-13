@@ -2,43 +2,32 @@
 ;; file:  base_register.clj
 ;; date:  2019-Jun-07
 (ns sham.base-register
-  (:refer-clojure :exclude [name peek compare])
-  (:require sham.register-items)
-  (:refer sham.register-items :only [register-name register-code] )
+  (:refer-clojure :exclude [name compare rand])
+
+  (:refer clojure.string :only [lower-case])
 
   (:require sham.register.impl)
-  (:refer sham.register.impl :only [register registers peek poke])
+  (:refer sham.register.impl :only [register registers])
+
+  (:require sham.util)
+  (:refer sham.util :only [code])
   )
 
 (def ^:private Register
   "Alias the \"type name\", hiding implementation details."
   :sham.register.impl/Register)
 
-;;(def ^:private register-names  (map register-name (list "nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr")))
-
 (def ^:private register-names ["nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr"])
 
 (def ^:private max-rand (Math/pow 2 16))
 
-(defn- _rand
-  ""
-  []
-  (register (rand-int max-rand)))
-
-
-;; (def ^:private registers-by-name
-;;   (zipmap register-names (map register-code (range (count register-names)))))
-
-;; (def ^:private registers-by-code
-;;   (zipmap (map register-code (range (count register-names))) register-names))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;          Forward declations
-(declare ^:private check-fn)
+(declare ^:private check-fn rand)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;(def registers (vec (repeat (count register-names) (register 0))))
+(def register-code (partial code register-names "register"))
+
 (def sham-registers (registers register-names))
 
 (defmulti plus "Add either a number or register to register."  check-fn)
@@ -96,13 +85,21 @@
 (defmethod compare [Register Register] [r1 r2]
   (register (apply clojure.core/compare (map :value [r1 r2]))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;   private functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- check-fn
-  ""
+  "Dispatch function for register operation multimethods."
   [p1 p2]
   [(type p1) (if (number? p2)
                Number
                (type p2))])
+
+(defn- rand
+  "Create a register holding a random integer."
+  []
+  (register (rand-int max-rand)))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

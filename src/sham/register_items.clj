@@ -2,6 +2,8 @@
 ;; file:  register_items.clj
 ;; date:  2019-Jun-25
 
+;; TODO: Consider removing from the project.
+
 (ns sham.register-items
   (:require [sham.register-items.impl :as impl] ))
 

@@ -1,70 +1,28 @@
 ;; author: Mark W. Naylor
-;; file:  memory.clj
-;; date:  2019-Aug-12
+;; file:  impl.clj
+;; date:  2019-Jun-25
 
-(ns sham.memory
-  (:use [sham.util :only [atom?]]))
+;; TODO: Concider removing from project.
 
-(defn memory
-  "Initializes a memory bank of given size to zeros."
-  [size-in-bytes]
-  {:pre [(number? size-in-bytes)]}
-  (atom (vec (repeat size-in-bytes (byte 0)))))
+(ns sham.register-items.impl
+  (:refer clojure.string :only [lower-case]))
 
-(defn- byte?
-  "Is x of type byte?"
-  [x]
-  (= Byte (class x)))
+(def RegisterCode ::RegisterCode)
+(def RegisterName ::RegisterName)
 
+(defn register-code
+  "RegisterCode constructor."
+  [^Number n]
+  {:pre [(number? n)]}
+  (with-meta {:value (unchecked-byte n)} {:type RegisterCode}))
 
-(defn- memory-bank?
-  "Is x a collection of bytes?"
-  [x]
-  (and (atom? x)
-       (every? byte? (deref x))))
+(defn register-name
+  "RegisterName constructor."
+  [s]
+  {:pre [(string? s)
+         (< (count s) 3)]}
+  (with-meta {:value (lower-case s)} {:type RegisterName}))
 
-
-(defn peek-byte
-  "Return a byte from a memory bank at the given offset."
-  [obj idx]
-  {:pre [(memory-bank? obj)
-         (number? idx)
-         (< -1 idx (count (deref obj)))]}
-  ((deref obj) idx))
-
-(defn poke-byte
-  "Puts a byte into a memory bank at the given offset."
-  [obj idx n]
-  {:pre [(memory-bank? obj)
-         (number? idx)
-         (number? n)
-         (< -1 idx (count (deref obj)))]}
-  (swap! obj assoc idx (unchecked-byte n)))
-
-(defn peek-word
-  "Return a word from a memory bank at the given offset."
-  [obj idx]
-  {:pre [(memory-bank? obj)
-         (number? idx)
-         (>= idx 0)
-         (< (inc idx) (count (deref obj)))]}
-  (let [dobj (deref obj)]
-    (bit-or
-     (bit-shift-left (dobj idx) 8)
-     (dobj (inc idx)))))
-
-(defn poke-word
-  "Puts a word into a memory bank at the given offset."
-  [obj idx n]
-  {:pre [(memory-bank? obj)
-         (number? idx)
-         (number? n)
-         (< -1 idx (count (deref obj)))]}
-  (let [idx+ (inc idx)
-        lo (unchecked-byte n)
-        hi (unchecked-byte (bit-shift-right (unchecked-short n) 8))]
-    (swap! obj assoc idx hi)
-    (swap! obj assoc idx+ lo)))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License
