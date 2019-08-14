@@ -8,10 +8,13 @@
 
   (:require sham.base-register)
   (:refer sham.base-register :only
-          [sham-registers rand poke register register-code] )
+          [sham-registers rand peek poke register register-code] )
 
   (:require sham.memory)
   (:refer sham.memory :only [memory peek-byte poke-byte peek-word poke-word])
+
+  (:require sham.opcodes)
+  (:refer sham.opcodes :only [code-zone])
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -214,7 +217,49 @@
   [& args]
   (not-implemented "-interrupt"))
 
+;; "Sub" fetches.
 
+(defn fetch-none
+  "One byte op, no parameters."
+  [& args]
+  {})
+
+(defn fetch-two
+  "Two byte op, next byte the contains r1 and r2 operands, in the high
+  and low nibbles respectively."
+  [ram ip]
+  (let [val (peek-byte ram (inc ip))
+        r1 (bit-shift-right val 4)
+        r2 (bit-and val 2r1111)]
+    (conj (fetch-none) [:r1 r1] [:r2 r2])))
+
+(defn fetch-three
+  "Two byte op, next byte the contains r1 and r2 operands, in the high
+  and low nibbles respectively. The next word after the register byte
+  contains the address operand."
+  [ram ip]
+  (conj (fetch-two ram ip) [:address (peek-word ram (+ 2 ip))]))
+
+;; Creating a jump table with functions having the same signature
+;; simplifies the logic in 'fetch', eliminating a cond satement.
+(def fetch-table {1 fetch-none
+                  2 fetch-two
+                  4 fetch-three})
+
+(defn fetch
+  "Get current ip, next ip, operands, if any, update prior-ip and registers."
+  [registers ram]
+  (let [f #(peek registers %)
+        code (-> "ip" register-code)
+        ip (-> code f :value)
+        op (peek-byte ram (int ip))
+        zone (code-zone ip)
+        next-ip (byte (+ ip zone))]
+    (reset! prior-ip ip)
+    (poke registers code (register next-ip))
+    {:ip ip :opcode op :operands ((fetch-table zone) ram ip)}
+    )
+  )
 
 (defn startup
   "Entry point for the SHAM computer."
