@@ -20,9 +20,9 @@
   {:pre [(coll? coll) (string? kind) (string? name)]}
   (let [idx (.indexOf coll (lower-case name))]
     (if (> idx -1)
-        (byte idx)
-        (throw (java.lang.IllegalArgumentException.
-                (str "No such " kind " '" name "'"))))))
+      idx
+      (throw (java.lang.IllegalArgumentException.
+              (str "No such " kind " '" name "'"))))))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

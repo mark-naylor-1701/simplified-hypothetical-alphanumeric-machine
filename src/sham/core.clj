@@ -3,17 +3,15 @@
 ;; date:  2019-Jun-15
 
 (ns sham.core
-  (:require sham.base-register)
-  (:require [sham.register.impl :refer [register]])
+  (:require sham.computer)
+  (:refer sham.computer :only [startup])
   )
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (let [ax (register 3) bx (register 7)]
-    (println (str "ax: " ax "  " (:value ax)))
-    (println (str "bx: " bx "  " (:value bx)))
-    )
+
+  (startup)
 
   )
 

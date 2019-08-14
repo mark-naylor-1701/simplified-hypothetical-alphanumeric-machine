@@ -1,13 +1,14 @@
 ;; author: Mark W. Naylor
 ;; file:  base_register.clj
 ;; date:  2019-Jun-07
+
 (ns sham.base-register
   (:refer-clojure :exclude [name compare rand])
 
   (:refer clojure.string :only [lower-case])
 
-  (:require sham.register.impl)
-  (:refer sham.register.impl :only [register registers])
+  (:require [sham.register.impl :as impl])
+  (:refer sham.register.impl :only [registers])
 
   (:require sham.util)
   (:refer sham.util :only [code])
@@ -23,12 +24,31 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;          Forward declations
-(declare ^:private check-fn rand)
+(declare rand)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  Mappings to implementation functions.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def peek impl/peek)
+(def poke impl/poke)
+(def register impl/register)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (def register-code (partial code register-names "register"))
 
-(def sham-registers (registers register-names))
+(defn sham-registers
+  []
+  (registers register-names))
+
+(defn- check-fn
+  "Dispatch function for register operation multimethods."
+  [p1 p2]
+  [(type p1) (if (number? p2)
+               Number
+               (type p2))])
 
 (defmulti plus "Add either a number or register to register."  check-fn)
 
@@ -89,14 +109,7 @@
 ;;   private functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- check-fn
-  "Dispatch function for register operation multimethods."
-  [p1 p2]
-  [(type p1) (if (number? p2)
-               Number
-               (type p2))])
-
-(defn- rand
+(defn rand
   "Create a register holding a random integer."
   []
   (register (rand-int max-rand)))
