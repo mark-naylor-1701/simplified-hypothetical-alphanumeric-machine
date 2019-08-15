@@ -8,7 +8,7 @@
 
   (:require sham.base-register)
   (:refer sham.base-register :only
-          [sham-registers rand peek poke register register-code] )
+          [sham-registers rand peek poke register register-code neg add-1 sub-1 plus minus times divided-by])
 
   (:require sham.memory)
   (:refer sham.memory :only [memory peek-byte poke-byte peek-word poke-word])
@@ -48,7 +48,6 @@
 
 (defn random
   [regs]
-  ;(not-implemented "random")
   (poke regs (register-code "ax") (rand)))
 
 (defn return
@@ -65,31 +64,31 @@
 
 (defn trace_on
   [& args]
-  (not-implemented "trace_on"))
+  (nop))
 
 (defn trace_off
   [& args]
-  (not-implemented "trace_off"))
+  (nop))
 
 (defn enable
   [& args]
-  (not-implemented "enable"))
+  (nop))
 
 (defn disable
   [& args]
-  (not-implemented "disable"))
+  (nop))
 
 (defn negate
-  [& args]
-  (not-implemented "negate"))
+  [regs n]
+  (poke regs n (neg (peek regs n))))
 
 (defn increment
-  [& args]
-  (not-implemented "increment"))
+  [regs n]
+  (poke regs n (add-1 (peek regs n))))
 
 (defn decrement
-  [& args]
-  (not-implemented "decrement"))
+  [regs n]
+  (poke regs n (sub-1 (peek regs n))))
 
 (defn clear
   [regs n]
@@ -104,24 +103,33 @@
   (not-implemented "pop"))
 
 (defn move
-  [& args]
-  (not-implemented "move"))
+  [regs n1 n2]
+  ;;(not-implemented "move")
+  (poke regs n1 (peek regs n2)))
 
 (defn add
-  [& args]
-  (not-implemented "add"))
+  [regs n1 n2]
+  (let [r1 (peek regs n1)
+        r2 (peek regs n2)]
+    (poke regs n1 (plus r1 r2))))
 
 (defn subtract
-  [& args]
-  (not-implemented "subtract"))
+  [regs n1 n2]
+  (let [r1 (peek regs n1)
+        r2 (peek regs n2)]
+    (poke regs n1 (minus r1 r2))))
 
 (defn multiply
-  [& args]
-  (not-implemented "multiply"))
+  [regs n1 n2]
+  (let [r1 (peek regs n1)
+        r2 (peek regs n2)]
+    (poke regs n1 (times r1 r2))))
 
 (defn divide
-  [& args]
-  (not-implemented "divide"))
+  [regs n1 n2]
+  (let [r1 (peek regs n1)
+        r2 (peek regs n2)]
+    (poke regs n1 (divided-by r1 r2))))
 
 (defn compare
   [regs r1 r2]
@@ -133,89 +141,89 @@
   [& args]
   (not-implemented "in"))
 
-(defn out
-  [& args]
-  (not-implemented "out"))
-
-(defn branch
-  [& args]
-  (not-implemented "branch"))
-
-(defn call
-  [& args]
-  (not-implemented "call"))
-
-(defn fetch_byte
-  [& args]
-  (not-implemented "fetch_byte"))
-
-(defn fetch_word
-  [& args]
-  (not-implemented "fetch_word"))
-
-(defn store_byte
-  [& args]
-  (not-implemented "store_byte"))
-
-(defn store_word
-  [& args]
-  (not-implemented "store_word"))
-
-(defn stream
-  [& args]
-  (not-implemented "stream"))
-
-(defn testandset
-  [& args]
-  (not-implemented "testandset"))
-
-(defn interrupt
-  [& args]
-  (not-implemented "interrupt"))
-
 (defn -in
   [& args]
   (not-implemented "-in"))
+
+(defn out
+  [& args]
+  (not-implemented "out"))
 
 (defn -out
   [& args]
   (not-implemented "-out"))
 
+(defn branch
+  [& args]
+  (not-implemented "branch"))
+
 (defn -branch
   [& args]
   (not-implemented "-branch"))
+
+(defn call
+  [& args]
+  (not-implemented "call"))
 
 (defn -call
   [& args]
   (not-implemented "-call"))
 
+(defn fetch_byte
+  [& args]
+  (not-implemented "fetch_byte"))
+
 (defn -fetch_byte
   [& args]
   (not-implemented "-fetch_byte"))
+
+(defn fetch_word
+  [& args]
+  (not-implemented "fetch_word"))
 
 (defn -fetch_word
   [& args]
   (not-implemented "-fetch_word"))
 
+(defn store_byte
+  [& args]
+  (not-implemented "store_byte"))
+
 (defn -store_byte
   [& args]
   (not-implemented "-store_byte"))
+
+(defn store_word
+  [& args]
+  (not-implemented "store_word"))
 
 (defn -store_word
   [& args]
   (not-implemented "-store_word"))
 
+(defn stream
+  [& args]
+  (not-implemented "stream"))
+
 (defn -stream
   [& args]
   (not-implemented "-stream"))
 
+(defn testandset
+  [& args]
+  (nop)
+
 (defn -testandset
   [& args]
-  (not-implemented "-testandset"))
+  (nop))
+
+(defn interrupt
+  [& args]
+  (nop))
 
 (defn -interrupt
   [& args]
-  (not-implemented "-interrupt"))
+  (nop))
 
 ;; "Sub" fetches.
 
