@@ -1,4 +1,4 @@
--*- fill-column: 80;  -*-
+-*- fill-column: 80; abbrev-mode: t  -*-
 
 * Specific Machine Structure
 ** Simulated Computers
@@ -77,8 +77,36 @@
    simulates the IPL or initial program loading of all computers, In the SHAM
    system, the contents of SHAM.ROM may not be directly addressed: assume that
    the RAM memory is faster than the ROM memory and that the transfer from ROM
-   to RAM is to take advtage of that fact.
+   to RAM is to take advantage of that fact. the RAM memory is volatile; i.e.,
+   its contents disappear when the power is turned off (a SHAM session is
+   terminated) while the ROM memory is permanent. The second file (SHAM.STM) is
+   designed to be an auxiliary ROM memory that may contain a machine procedure
+   that could be dynamically loaded by the operating system and will serve as a
+   vehicle for transferring a machine language (non-text) file onto the
+   SHAM.DSK. The last two files (SHAM.DSK and SHAM.TXT) will be used to simulate
+   a single disk drive (SHAM.DSK) and the cassette (SHAM.TXT) for secondary
+   memory storage. It is anticipated that the operating system will be written
+   that will 𝘧𝘰𝘳𝘮𝘢𝘵 the simulated disk drive to whatever number of 256 byte
+   sectors is desired. Data and programs will be stored by SHAM machine language
+   programs using commands that read from and write to disk (SHAM.DSK). The text
+   file (SHAM.TXT) may be used by SHAM programs to input a stream of bytes into
+   the SHAM primary memory.
 
+   SHAM is deliberately limited in its design in order to achieve simplicity.
+   Those structures that do not relate to operating system design are omitted.
+   There is but a single disk drive There is no floating point, only small
+   integer arithmetic is permitted. There is no divide overflow interrupt. SHAM
+   does not provide relative timing in its simulation. The commands do take
+   different real time intervals for execution depending on their complexity but
+   there is, for example, no attempt to simulate the tremendous differences in
+   steed between register aces and primary memory access, which differ by factors
+   up to several thousand in real machines.
+
+   Certain commands are missing in SHAM that might be found in other processors.
+   There are, for example, no bit manipulation commands in SHAM. There are no
+   register shift op-codes. The flag register will only indicate three level and
+   is not used to record results of arithmetic carry or of divide overflow or of
+   parity failure in data manipulation.
 
 * Footnotes
 
