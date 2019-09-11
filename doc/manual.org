@@ -1,0 +1,87 @@
+-*- fill-column: 80;  -*-
+
+* Specific Machine Structure
+** Simulated Computers
+   A computer may be built or it may be simulated or it may be emulated. The
+   first is called a 𝘭𝘪𝘵𝘦𝘳𝘢𝘭 machine and actually exists, consisting of chips
+   and wires that can be felt and occupy space. The second and third are
+   nonexistent machines, but exist logically. They are called 𝘷𝘪𝘳𝘵𝘶𝘢𝘭
+   machines. The distinction between simulation and emulation is that simulation
+   is done by writing a program and executing it on some host computer, while
+   emulation is done in hardware. Emulation is generally faster in execution
+   than simulation but lacks the flexibility of easy program modification. There
+   is even a compromise approach, in which a micro-program is loaded into an
+   emulator, that tries to combine speed of execution with flexibility. There
+   are many reasons to have virtual machines. A computer vendor might encourage
+   the sales of their[sic] computers by including emulation hardware that
+   imitates the commands of a competitor's machine. This would encourage the
+   sale of their[sic] 𝘣𝘦𝘵𝘵𝘦𝘳 machine without the customer having to sacrifice
+   the present inventory of programs written in the the competitor's machine
+   language. Another use, using emulation for high speeds, is to design virtual
+   machines that have their 𝘮𝘢𝘤𝘩𝘪𝘯𝘦 𝘭𝘢𝘯𝘨𝘶𝘢𝘨𝘦 one of the higher level languages,
+   such as Pascal or Ada, in order to completely avoid program translation.
+   Simulated computers might be used there the need for speed is second to
+   flexibility, as in the evaluation of new computer designs before actual
+   production begins or to provide testing of programs before prototypes are
+   constructed. Another reason of simulation is to provide a machine structure
+   for educational purposes.
+** The SHAM Computer
+   The SHAM computer (an acronym of simplified hypothetical alphanumeric
+   machine) is a virtual, or simulated, machine that can be used to study the
+   principles of system programming without concern about the limitations,
+   availability, or complications of a real machine. SHAM is a simulated
+   computer designed for educational purposes. It is simplified to avoid
+   cumbersome and educationally unimportant details but has typical machine
+   structure from a programmer's viewpoint. The use of SHAM provides for
+   portability of the exercises and examples used to teach system programming
+   and permits the student to avoid the choking details that must be faced with
+   literal machines before anything may be done. The concept of a VM is widely
+   used, even to the extent of a large mainframe computer witching from one
+   virtual machine to another at millisecond intervals so that each user on such
+   a time-slicing system may have a completely different machine to work with. A
+   VM simulation is accomplished by writing the behavior of a virtual machine in
+   a high level language, compiling this program to the low level hardware
+   language of some host computer, and executing the resultant program which
+   then behaves as though it were a computer: in this case the SHAM computer.
+   The SHAM computer is written in the C language.[fn:1]
+** SHAM Overview
+   The structure of SHAM is selected to reflect the performance of a typical
+   computer, to provide a target computer for the design of operating systems,
+   and to provide irritating machine limitations that are so typical of real
+   computers. The latter point is included to give realistic experience of the
+   type encountered when designing operating systems for actual computers. As an
+   example of ease of usage, SHAM includes an instruction to place a random
+   number in the AX register. No real machine provides this, a software routine
+   is always required. Thus, SHAM makes it simple to generate test data to
+   evaluate its performance in different situations. On the other hand, the use
+   of SHAM requires attention to different methods of addressing: absolute
+   addressing, relative addressing using the DR register, stack addressing with
+   the SR register, special behavior of the FX register, and indirect
+   addressing. These peculiarities of one machine versus another are a major
+   reason for the difficulty in porting operating system software from one
+   machine environment to another. Finally, being written in a high level
+   language the SHAM computer may be easily modified to study the impact of
+   machine structure on system software design and performance.
+
+   It is assumed that SHAM will be implemented on a host computer that has a
+   keyboard for data entry, a video display for standard output, and a secondary
+   memory for simulation of SHAM's disk memory and streaming input. No printer
+   is involved in the SHAM system and  any hard copy will have to be provided by
+   the host system, perhaps by redirecting the standard output to a file for
+   subsequent printing. The host machine secondary memory will actually hold
+   four files: SHAM.ROM, SHAM.STM, SHAM.DSK and SHAM.TXT, The first will
+   simulate a ROM, or read only memory, on which the operating system program
+   will be stored. When SHAM is activated, that program will automatically load
+   into the SHAM internal RAM memory beginning at address location 0. The
+   program will start executing from location 0 after loading is completed; this
+   simulates the IPL or initial program loading of all computers, In the SHAM
+   system, the contents of SHAM.ROM may not be directly addressed: assume that
+   the RAM memory is faster than the ROM memory and that the transfer from ROM
+   to RAM is to take advtage of that fact.
+
+
+* Footnotes
+
+[fn:1] This was the original implementation dating back circa 1988.
+Probably earlier, as original material dates back to the Fall term of
+that year.
