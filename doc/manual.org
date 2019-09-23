@@ -204,8 +204,108 @@
    on he type of computer and the year in which it was built. Programmers who
    can create these bit patterns and enter then[sic] into the correct locations
    in program memory are programming at the machine level of detail and this
-   action is referred to a machine language programming.cc
+   action is referred to a machine language programming.
 
+** C Simulation Program
+   The following C language function is the main cycle of the SHAM computer:
+   #+BEGIN_SRC c
+   main() {
+       char memory[MEM_SIZE]; /* SHAM internal memory. */
+       r1 = 0;                /* Boot from SHAM.ROM.   */
+       stream(memory);
+
+       /* The cycle is repeated endlessly. */
+       while (1) {
+           fetch(memory);    /* Fetch instruction.  */
+           execute(memory);  /* Execute instruction. */
+       }
+   }
+   #+END_SRC
+   The memory is declared as an array of type character with a size specified by
+   MEM_SIZE (which is 32678.) The subscripts for this array may range from 0
+   to 32577. The first action of the "main" procedure is to "boot up" by reading
+   the file SHAM.ROM into memory starting at zero, by calling the function
+   stream(memory) with r1 set to zero. Then SHAM (until a TERMINATE instruction
+   is executed) fetches the next instruction from memory and then executes that
+   instruction via a call to a different C function (not shown here) for each
+   instruction.
+
+** The Processing Unit
+   The structure of the processing unit consists of the high speed registers
+   and the circuitry required to analyze the command bit pattern and to control
+   the rest of the computer. This circuitry determines the command repertoire of
+   the particular machine. To properly utilize a computer, the machine level
+   programmer must know what that repertoire is. Computers manufactured by
+   different vendors will have dissimilar command sets, and frequently,
+   different models within one vendor will too. This means that a programmer who
+   knows how to program one machine; i.e., to create the bit patterns to control
+   the computer cannot use that knowledge to program any other type of computer.
+   In addition to the command register and the control circuitry, the processing
+   unit requires a "next location" register which enables the unit to fetch the
+   next command in proper sequence. Remember, fetch is a copy operation, and
+   the original commanded in the program memory is not destroyed or altered by
+   being fetched. The next location register, also called the instruction
+   pointer register, is automatically changed after the fetch (and sometimes by
+   the program command itself in the execute phase) so that it points to the
+   next command to be executed. How the location register is initialized to
+   point to the first command in the program varies from one machine to
+   another, but one solution is to have the programs always start from the same
+   location in memory. In SHAM , the IP (instruction pointer) register is set to
+   zero when the simulation program is initiated (Initial Program Load is what it
+   is called) and all application programs must start with their first command
+   in location zero of the SHAM primary memory.
+
+   There are other registers in the processing unit. These are often combined
+   with the registers in the computer's arithmetic and logical unit as general
+   purpose registers. These registers are used in address modifications as well
+   as arithmetic calculations.
+
+** Register Memory
+   There are eleven registers in SHAM. All registers are of word length (16
+   bits), All arithmetic is word oriented and of integer mode; there are no
+   floating point or real arithmetic commands in the SHAM repertoire. Five
+   registers are general purpose: these are named the AX, BX, CX, DX, and EX
+   registers. The FX register (sometimes referred to as the frame register) is
+   similar except that when it appears as the second register in a four-byte
+   SHAM command the SR (stack register) contents are added to the FX contents
+   rather than the DR (data register) which is done for all other relative
+   addressing. In addition to these six, there are the DR, IP, SR, SP, and the
+   FR registers. The FR is a flag register, and although it is 16 bits long, is
+   used only to contain a flag of value -1, 0, +1 to indicate the result of a
+   previous compare command. The DR register is used as the base register for
+   procedure relocation. The contents of the IP register, the command address
+   offsets, and the indirect addresses in other registers are each added to the
+   contents of DR before execution to produce a machine memory address that is
+   the sum of some base address and some displacement. The IP register is the
+   instruction pointer and contains the address of the next command in memory
+   to be fetched and executed. The SP (stack register)contains the base address
+   of some location in memory to be used in stack addressing(in such commands as
+   PUSH, POP, CALL, and RETURN). The SP (stack pointer) contains an offset that
+   is added to the contents of SR to create the actual stack address and it is
+   the SP register that is changed by a command such as PUSH or POP. The
+   contents of DR,IP, SR, and SP are set during IPL. The value of DR and IP are
+   each set to zero, so that the program in ROM must start execution at absolute
+   address of zero. The contents of SR are set by IPL to a value just larger
+   than the program read in from ROM so that the first stack established lies in
+   the memory jut after the ROM program. The value of SP is set to 600, so tat
+   there is an initial stack large enough for most application,. The user
+   program may change any of these values subsequently. In summary:
+   | SHAM high-speed 16 bit register memory |                                                                                 |
+   |----------------------------------------+---------------------------------------------------------------------------------|
+   | AX                                     | Five                                                                            |
+   | BX                                     | general                                                                         |
+   | CX                                     | purpose                                                                         |
+   | DX                                     | arithmetic                                                                      |
+   | EX                                     | registers.                                                                      |
+   | FX                                     | Frame register (may be used in arithmetic.)                                     |
+   | DR                                     | Restricted to point to next                                                     |
+   | IP                                     | instruction to be fetched.                                                      |
+   | SR                                     | Restricted to point to a user                                                   |
+   | SP                                     | specified stack in memory.                                                      |
+   | FR                                     | Flag register (set by compare command and used by conditional branch commands.) |
+
+
+** Interrupts and Reserved Vector
 * Footnotes
 
 [fn:1] This was the original implementation circa 1988, when I received the
