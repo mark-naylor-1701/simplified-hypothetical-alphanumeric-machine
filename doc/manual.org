@@ -1,4 +1,4 @@
--*- fill-column: 80; abbrev-mode: t  -*-
+# -*- fill-column: 80; abbrev-mode: t  -*-
 
 * Specific Machine Structure
 ** Simulated Computers
@@ -25,6 +25,7 @@
    production begins or to provide testing of programs before prototypes are
    constructed. Another reason of simulation is to provide a machine structure
    for educational purposes.
+
 ** The SHAM Computer
    The SHAM computer (an acronym of simplified hypothetical alphanumeric
    machine) is a virtual, or simulated, machine that can be used to study the
@@ -44,6 +45,7 @@
    language of some host computer, and executing the resultant program which
    then behaves as though it were a computer: in this case the SHAM computer.
    The SHAM computer is written in the C language.[fn:1]
+
 ** SHAM Overview
    The structure of SHAM is selected to reflect the performance of a typical
    computer, to provide a target computer for the design of operating systems,
@@ -108,8 +110,103 @@
    is not used to record results of arithmetic carry or of divide overflow or of
    parity failure in data manipulation.
 
+** Input and Output Operations
+   There are four peripheral i-o devices on SHAM, a keyboard input, a video output
+   call Input-Output, a video output call [sic] Display and the tape-like file
+   called Textile (SHAM.TXT). The two video devices (input-Output and Display)
+   are displayed side by side on the host machine video display output. All of
+   these input-output devices are one character at a time units. The characters
+   are transferred directly into or from primary memory locations without
+   interference with processor or secondary memory access. There is no direct
+   connection between the registers and output ports and characters will have to
+   stored [sic] in memory and then outputted. Non-graphic characters are
+   handled differently on SHAM than many machines (but that is true for those
+   many machines, i-o differences make operating system potability a problem).
+   On the Input-Output display, the backspace will move the cursor backwards
+   (its[sic] the only cursor control) and will output the character previously
+   displayed in white ink as opposed to the normal black ink, thus erasing the
+   previously displayed character. The carriage return acts like the carriage
+   return on old-fashioned typewriters; i.e., it not only returns the cursor to
+   the leftmost position but it issues a line feed. The combustion carriage
+   return and line feed, required on some computers, is not needed on SHAM. The
+   ASCII control character for carriage-return[sic] is encoded as the number 13.
+   There is no cursor control for the display units and no graphic facilities,
+   just character output. There is no on-line printer, thus avoiding the problem
+   of escape sequences, but the Display video acts like a printer in that no
+   backspace may take place. There are no communication ports. There are no
+   light pen or mouse inputs.
+** Primary and Secondary Memory
+   The internal memory, or RAM, is simulated to be 32678 bytes of storage that
+   will volatilize when the SHAM program is terminated. The 32K bytes in the RAM
+   are addressable from 0 through 32677. In addition to byte addressing, word
+   referencing is permitted by commands that fetch or store two contiguous
+   bytes. This is true for all addresses, whether odd or even. except for the last
+   byte at 323677; there is no byte following that one (the memory is not
+   circular).
+
+   The single 32 KB primary memory is used to store both programs and data.
+   Certain addresses in lower memory should be avoided in programming; as with
+   many computers these locations are reserved for machine purposes, such as an
+   interrupt vector. It would have been simple to make the SHAM primary memory
+   larger. all that is required is to change the dimension in the memory
+   descriptor in the source program:
+
+   #+BEGIN_SRC c
+   #define MEM_SIZE 32768
+   char memory[MEM_SIZE];  /* SHAM internal memory */
+   #+END_SRC
+
+   However, the use of the smaller 32 KB memory will ensure the design of an
+   operating system that efficiently utilizes memory allocation. The same point
+   can be made about the SHAM word size, which is 16 bits (two bytes), A simple
+   change in the source program to define the integers as 𝘭𝘰𝘯𝘨 would suffice,
+   but the smaller word forces the designer to be more conscious of hardware
+   limitations.
+
+   The secondary memory simulates a disk drive, with fixed sector size of 256
+   bytes. An entire sector is read to or written from primary memory by machine
+   command. There is no hardware buffer, the sector is coped directly into or
+   from primary memory starting at any specified address low enough from 32677 to
+   allow for a full sector (there is no memory wraparound). The timing of the
+   sector transfer is determined by the host computer since the SHAM.DSK drive
+   is simulated by a host computer disk file.
+
+** The Fetch-Execute Cycle
+   The design of a computer requires a working memory to hold the stored program
+   and a processing unit to interpret the commands of the program and effect
+   their execution. In the simplest case, a program consists of a sequence of
+   commands that are stored in some high speed memory accessible to the
+   processing unit.  A command is copied from the memory into a small storage unit
+   called a command register. The command register is not available to the
+   programmer. The command will consist of a series of bits and might look
+   something like this:
+   #+BEGIN_SRC asm
+   0110110101110010
+   #+END_SRC
+   That particular combination of bits, represented by a sequence of bistable
+   devices in the command register, would cause the processing unit to initiate
+   some simple action, such as: add two numbers. Such an action would be only
+   one in a long series of steps required to direct the computer to obtain some
+   meaningful results. The processing unit would then fetch the next command in
+   sequence to the command register, erasing the previous command, and replacing
+   it with something like:
+   #+BEGIN_SRC asm
+   1001101111011111
+   #+END_SRC
+   which might direct the processing unit to multiply the previous sum be a
+   third number. These two steps:
+   1. fetch the next command in the program
+   2. interpret and execute that command
+   are the heart beat of the computer. The processing unit repeats that cycle
+   endlessly: fetch and execute. The actions of the computer are entirely the
+   result of the bit patterns stored in the program memory. These bit patterns
+   are store in some magnetic or electronic device; the exact device depending
+   on he type of computer and the year in which it was built. Programmers who
+   can create these bit patterns and enter then[sic] into the correct locations
+   in program memory are programming at the machine level of detail and this
+   action is referred to a machine language programming.cc
+
 * Footnotes
 
-[fn:1] This was the original implementation dating back circa 1988.
-Probably earlier, as original material dates back to the Fall term of
-that year.
+[fn:1] This was the original implementation circa 1988, when I received the
+original materials.
