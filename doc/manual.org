@@ -290,22 +290,96 @@
    the memory jut after the ROM program. The value of SP is set to 600, so tat
    there is an initial stack large enough for most application,. The user
    program may change any of these values subsequently. In summary:
-   | SHAM high-speed 16 bit register memory |                                                                                 |
-   |----------------------------------------+---------------------------------------------------------------------------------|
-   | AX                                     | Five                                                                            |
-   | BX                                     | general                                                                         |
-   | CX                                     | purpose                                                                         |
-   | DX                                     | arithmetic                                                                      |
-   | EX                                     | registers.                                                                      |
-   | FX                                     | Frame register (may be used in arithmetic.)                                     |
-   | DR                                     | Restricted to point to next                                                     |
-   | IP                                     | instruction to be fetched.                                                      |
-   | SR                                     | Restricted to point to a user                                                   |
-   | SP                                     | specified stack in memory.                                                      |
-   | FR                                     | Flag register (set by compare command and used by conditional branch commands.) |
+
+   +------------------------------------------------------------+
+   |           SHAM high-speed 16 bit register memory           |
+   +-----+------------------------------------------------------+
+   | AX  |Five general purpose arithmetic registers.             |
+   +-----+                                                      |
+   | BX  |                                                      |
+   +-----+                                                      |
+   | CX  |                                                      |
+   +-----+                                                      |
+   | DX  |                                                      |
+   +-----+                                                      |
+   | EX  |                                                      |
+   +-----+------------------------------------------------------+
+   | FX  |Frame register (may be used in arithmetic).           |
+   |     |                                                      |
+   +-----+------------------------------------------------------+
+   | DR  |Restricted to point to the next instruction to be     |
+   +-----+fetched.                                              |
+   | IP  |                                                      |
+   +-----+------------------------------------------------------+
+   | SR  |Restricted to point to a user specified stack in       |
+   +-----+memory.                                               |
+   | SP  |                                                      |
+   +-----+------------------------------------------------------+
+   | FR  |Flag register (set by compare command and used by     |
+   |     |conditional branch commands.                          |
+   |     |                                                      |
+   +-----+------------------------------------------------------+
 
 
 ** Interrupts and Reserved Vector
+   No modern computer would be without an interrupt scheme. In SHAM, the
+   interrupt is limited to a clock driven interrupt. There is no interrupt for
+   pressing a key on the keyboard, no interrupt for a completion of I/O, no
+   interrupt for a program error such as divide overflow, in fact, no other
+   interrupt at all. This clock drive interrupt allows for an interrupt to occur
+   when a quantum of time has elapsed. The 𝘤𝘭𝘰𝘤𝘬 is not a real time clock; it
+   starts at zero on IPL and increments itself once on every command execution.
+   In a real computer, different commands use different times for execution: a
+   multiply command is much longer than a move command. The clock value (a 16
+   bit integer) is compared by SHAM with the value currently stored in location
+   0 and 1 (a two byte word). An interrupt occurs when the clock equal the stored
+   value: the values of UR, DR, and IP are stacked on the current stack, at
+   location (SR) + (SP), an control is transferred to the procedure whose IP and
+   DR values are stored in location 12 and 14 (each a wold long, the IP value is
+   in bytes 12 and 13, the DR value in bytes 14 and 15). These values are not
+   placed there automatically, some program must do so. There are two,
+   opcodes (ENABLE and DISABLE) that may be used by the application program: the
+   execution of an ENABLE is required to start increasing the clock value and
+   permit an interrupt; a DISABLE will discontinue increasing the clock value
+   until another ENABLE command is reached, if ever. The basic C language
+   simulation program can now be expanded to include this interrupt, as follows:
+   #+BEGIN_SRC c
+     main() {
+         char memory[MEM_SIZE];                          /* SHAM internal memory. */
+         int limit, clock = 0;                           /* These are used for the interrupt. */
+         r1 = 0;                                         /* Boot from SHAM.ROM. */
+         stream(memory);
+         /* The cycle is repeated endlessly. */
+         while (1) {
+             fetch(memory);                              /* Fetch instruction. */
+             execute(memory);                            /* Execute instruction. */
+             if (enable_flag) {                          /* Increment clock only if enable has been set. */
+                 limit = (memory[0] << 8) | memory[1];
+                 if (++clock == limit) {
+                     clock = 0;                          /* On interrupt, execute procedure whose */
+                     clock_int(memory);                  /* IP, DR are at location 12 & 14. */
+                 }
+             }
+         }
+     }
+   #+END_SRC
+   The clock variable is increased by one on each fetch-execute cycle and when
+   it equal the value in the first word of memory causes a transfer of control
+   to a SHAM program whose starting location must have been previously stored in
+   words 12 and 14. The integer variables limit and clock (initialized to zero)
+   are used in the segment that handles the interrupt. The value of limit is
+   calculated by
+   #+BEGIN_SRC c
+   limit = (memory[0] << 8) | memory[1]
+   #+END_SRC
+   which 𝘣𝘪𝘵 𝘰𝘳𝘴 the first byte of memory (shifted left 8 bits) with the second
+   byte: this is the value of the first word in the SHAM memory.
+
+   This simple example demonstrates the usefulness of the virtual computer
+   concept. SHAM could be originally written without the clock interrupt — then
+   a slight modification of the C source program and a recompile would create a
+   new SHAM computer.
+
 * Footnotes
 
 [fn:1] This was the original implementation circa 1988, when I received the
