@@ -450,7 +450,24 @@
       |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  | 10  | 11  |
       +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
 
-
+** Primary Memory Addressing
+   The addressing in SHAM, as with most computers, is a t three levels: an
+   absolute address, a relative address, and an indirect address. An absolute
+   address refers to a location in the memory from 1 to 32677. Location 0 cannot
+   be used as an absolute address in a SHAM instruction because an absolute
+   address is indicated by a negative value and negative zero is not allowed. An
+   absolute data address in the data address portion of a command refers
+   directly to one of the byte locations in a memory. A relative address is one
+   that is an offset from some base, modified perhaps by an index value. The
+   contents of the DR register is always used as the base register; it is not
+   described in the command and its contents are automatically added to the data
+   address before execution. Besides that addition, the contents of another
+   register (called the index register in this context) will also be added in if
+   its number is given in the reg2 position. Any register except FX may be used
+   as an index register. If the contents of the right nibble of byte two, is zero
+   (reg2 = 0) no register is used for indexing. The memory location referred to
+   by a relative address is:
+     memory location = (base register) + (index register) + (data register)
 * Footnotes
 
 [fn:1] This was the original implementation circa 1988, when I received the
