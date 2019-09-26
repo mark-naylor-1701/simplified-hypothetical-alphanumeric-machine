@@ -558,6 +558,30 @@
   the proper structure for loading into SHAM, either on IPL (from SHAM.ROM) or
   bit the use of the STREAM command (from SHAM.STM). It is the user's
   responsibility to create these external files (.ROM and .STM).
+** Using SHAM
+   The steps to follow, in order to create and run a program on SHAM, are as
+   follows:
+   1) Creating a source program
+      a) a text editor is needed
+      b) writing in assembly language
+      c) producing a binary file
+   2) Initial Program Load
+      a) one time load from SHAM.ROM
+      b) initialization of registers
+      c) reserved spaces convention
+   3) An example program (which does nothing):
+      #+BEGIN_SRC asm
+          branch        ,,start     ;A transfer of control action.
+          ds            ,,60        ;A pseudo-op to allocate space.
+      start:                        ;A symbolic label.
+          trace_on                  ;trace is a hardware action in SHAM.
+          fetch_word    AX,,=48     ;The contents of AX will be 0030
+          terminate                 ;Finished with system.
+      #+END_SRC
+** SHAM Schematic
+*** TODO Add the drawing
+
+
 * Footnotes
 
 [fn:1] This was the original implementation circa 1988, when I received the
