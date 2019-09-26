@@ -1,4 +1,4 @@
-# -*- fill-column: 80; abbrev-mode: t; -*-
+# -*- fill-column: 80; abbrev-mode: t; paredit-everywhere-mode: t; -*-
 
 * Specific Machine Structure
 ** Simulated Computers
@@ -468,6 +468,96 @@
    (reg2 = 0) no register is used for indexing. The memory location referred to
    by a relative address is:
      memory location = (base register) + (index register) + (data register)
+** Concurrency Control
+   There is a 𝘣𝘶𝘪𝘭𝘵-𝘪𝘯 memory interlock in SHAM, as with most modern computers,
+   that will prevent garbling of data on a memory store or fetch command when
+   two or more processors are concurrently accessing primary memory. This takes
+   the form of a tie resolution by the mutually exclusive access to a byte or a
+   word. Indefinite postponement (starvation) is avoided in SHAM by a poling of
+   any waiting processes, so that effectively a first-come, first-served queue
+   is formed. There is also a command called testandset that may be used with
+   any designated word address to write lock and unlock software procedures to
+   control concurrent processes. There is a stack mechanism, using the SR and SP
+   registers to allow the user to create stack arrays in primary memory for
+   reentrant programming techniques.
+** The Command Repertoire
+   The command repertoire of SHAM is: (all numerical values are hexadecimal)
+          +---------------+---------+-------------------------------+
+          |NOT            |   00    |These are one byte commands.   |
+          +---------------+---------+                               |
+          |RANDOM         |   01    |                               |
+          +---------------+---------+                               |
+          |RETURN         |   02    |                               |
+          +---------------+---------+                               |
+          |TERMINATE      |   03    |                               |
+          +---------------+---------+                               |
+          |TRACE_ON       |   04    |                               |
+          +---------------+---------+                               |
+          |TRACE_OFF      |   05    |                               |
+          +---------------+---------+                               |
+          |ENABLE         |   06    |                               |
+          +---------------+---------+                               |
+          |DISABLE        |   07    |                               |
+          +---------------+---------+-------------------------------+
+          |NEGATE         |   08    |These are two byte commands.   |
+          +---------------+---------+                               |
+          |INCREMENT      |   09    |                               |
+          +---------------+---------+                               |
+          |DECREMENT      |   0A    |                               |
+          +---------------+---------+                               |
+          |CLEAR          |   0B    |                               |
+          +---------------+---------+                               |
+          |PUSH           |   0C    |                               |
+          +---------------+---------+                               |
+          |POP            |   0D    |                               |
+          +---------------+---------+                               |
+          |MOVE           |   0E    |                               |
+          +---------------+---------+                               |
+          |ADD            |   0F    |                               |
+          +---------------+---------+                               |
+          |SUBTRACT       |   10    |                               |
+          +---------------+---------+                               |
+          |MULTIPLY       |   11    |                               |
+          +---------------+---------+                               |
+          |DIVIDE         |   12    |                               |
+          +---------------+---------+                               |
+          |COMPARE        |   13    |                               |
+          +---------------+---------+-------------------------------+
+          |IN             |   14    |These are four byte commands   |
+          +---------------+---------+and indirect addressing is 10  |
+          |OUT            |   15    |more.                          |
+          +---------------+---------+                               |
+          |BRANCH         |   16    |                               |
+          +---------------+---------+                               |
+          |CALL           |   17    |                               |
+          +---------------+---------+                               |
+          |FETCH_BYTE     |   18    |                               |
+          +---------------+---------+                               |
+          |FETCH_WORD     |   19    |                               |
+          +---------------+---------+                               |
+          |STORE_BYTE     |   1A    |                               |
+          +---------------+---------+                               |
+          |STORE_WORD     |   1B    |                               |
+          +---------------+---------+                               |
+          |STREAM         |   1C    |                               |
+          +---------------+---------+                               |
+          |TESTANDSET     |   1D    |                               |
+          +---------------+---------+                               |
+          |INTERRUPT      |   1E    |                               |
+          +---------------+---------+-------------------------------+
+  A command to store a byte from the AX register to relative address 32 modified
+  by index register CX would look like this:
+  #+BEGIN_SRC asm
+  1A130020
+  #+END_SRC
+  but no one ever writes code in machine language, an assembler is used. In the
+  SHAM system, a cross assembler is provided. Written in the high level language
+  C, the cross assembler will produce output that may be stored on SHAM.ROM or
+  on SHAM.STM for further input into the SHAM memory. That is, the cross
+  assembler transforms a character oriented source file into a binary file of
+  the proper structure for loading into SHAM, either on IPL (from SHAM.ROM) or
+  bit the use of the STREAM command (from SHAM.STM). It is the user's
+  responsibility to create these external files (.ROM and .STM).
 * Footnotes
 
 [fn:1] This was the original implementation circa 1988, when I received the
