@@ -1,4 +1,4 @@
-# -*- fill-column: 80; abbrev-mode: t  -*-
+# -*- fill-column: 80; abbrev-mode: t; -*-
 
 * Specific Machine Structure
 ** Simulated Computers
@@ -290,36 +290,34 @@
    the memory jut after the ROM program. The value of SP is set to 600, so tat
    there is an initial stack large enough for most application,. The user
    program may change any of these values subsequently. In summary:
-
-   +------------------------------------------------------------+
-   |           SHAM high-speed 16 bit register memory           |
-   +-----+------------------------------------------------------+
-   | AX  |Five general purpose arithmetic registers.             |
-   +-----+                                                      |
-   | BX  |                                                      |
-   +-----+                                                      |
-   | CX  |                                                      |
-   +-----+                                                      |
-   | DX  |                                                      |
-   +-----+                                                      |
-   | EX  |                                                      |
-   +-----+------------------------------------------------------+
-   | FX  |Frame register (may be used in arithmetic).           |
-   |     |                                                      |
-   +-----+------------------------------------------------------+
-   | DR  |Restricted to point to the next instruction to be     |
-   +-----+fetched.                                              |
-   | IP  |                                                      |
-   +-----+------------------------------------------------------+
-   | SR  |Restricted to point to a user specified stack in       |
-   +-----+memory.                                               |
-   | SP  |                                                      |
-   +-----+------------------------------------------------------+
-   | FR  |Flag register (set by compare command and used by     |
-   |     |conditional branch commands.                          |
-   |     |                                                      |
-   +-----+------------------------------------------------------+
-
+         +------------------------------------------------------------+
+         |           SHAM high-speed 16 bit register memory           |
+         +-----+------------------------------------------------------+
+         | AX  |Five general purpose arithmetic registers.            |
+         +-----+                                                      |
+         | BX  |                                                      |
+         +-----+                                                      |
+         | CX  |                                                      |
+         +-----+                                                      |
+         | DX  |                                                      |
+         +-----+                                                      |
+         | EX  |                                                      |
+         +-----+------------------------------------------------------+
+         | FX  |Frame register (may be used in arithmetic).           |
+         |     |                                                      |
+         +-----+------------------------------------------------------+
+         | DR  |Restricted to point to the next instruction to be     |
+         +-----+fetched.                                              |
+         | IP  |                                                      |
+         +-----+------------------------------------------------------+
+         | SR  |Restricted to point to a user specified stack in      |
+         +-----+memory.                                               |
+         | SP  |                                                      |
+         +-----+------------------------------------------------------+
+         | FR  |Flag register (set by compare command and used by     |
+         |     |conditional branch commands.                          |
+         |     |                                                      |
+         +-----+------------------------------------------------------+
 
 ** Interrupts and Reserved Vector
    No modern computer would be without an interrupt scheme. In SHAM, the
@@ -379,6 +377,79 @@
    concept. SHAM could be originally written without the clock interrupt — then
    a slight modification of the C source program and a recompile would create a
    new SHAM computer.
+
+** Instruction Format
+   Every command to be executed by the processing unit is divided into three
+   parts: the operation code part, a miscellaneous or multipurpose part, and a
+   data address part. Each command contains a string of bits that cause the
+   execution of one of the built-in operations. This is the operation code
+   portion, usually abbreviated to opcode and is used to tell the computer what
+   to do; as the fetch_word command copies a word of data from the primary
+   memory to a general purpose register or a multiply opcode multiplies the
+   contents of one register by another's contents and places the value in the
+   first register, and so on. Another portion of the command is set aside to
+   refer to the data address or location in addressable memory where the
+   reference data are stored. The fetch_word opcode will copy from some location
+   in memory; that location is specified by the data address portion of the
+   command. The third, or miscellaneous, portion of the command is used to refer
+   to which register is to be loaded or changed, to which subordinate action of
+   the opcode is to be executed, and as a general catch-all for different
+   computer system needs. A bit pattern for a command, say
+   000110100100000001011, would be partitioned by the processing unit into:
+                          +----------+--------------+
+                          |00011010  |opcode        |
+                          +----------+--------------+
+                          |0100      |miscellaneous |
+                          +----------+--------------+
+                          |00001011  |data address  |
+                          +----------+--------------+
+   which might mean: fetch the two bytes of storage (00011010) into the first
+   general purpose register (0100) from memory location 00001011. It will be
+   awkward to continue to describe the machine level programs in their correct
+   bit code, so the opcodes are usually referred to by some mnemonic (such as
+   fetch_word), and the registers by some letter combinations (such as: AX, BX,
+   CX, etc.), and the data address by some symbolic name (such as: INITIAL) so
+   that the example command would be written something like:
+   #+BEGIN_SRC asm
+   fetch_word  AX,,INITIAL
+   #+END_SRC
+   This notation would have no meaning to the processing unit and the machine
+   level programmers must convert that symbolic command into
+   000110100100000001011 before the program is entered into the computer and
+   executed. The solution, of course, is not to program in machine language.
+   Although all computers must have a machine level program stored in their
+   memory before anything can be accomplished, there is no need for that program
+   to be written by a human. A translating program of some type can be written
+   to convert human oriented notation to the requirements of the machine.
+
+   The instruction format in SHAM is of variable length: using one byte for
+   simple commands, two, bytes for longer commands, and four bytes for the most
+   complicated commands. This design reduces the required program storage but
+   places a slight burden on the programmer when compared to the fixed command
+   length machines. The location of a command is the address of its first byte.
+   Upon fetching one command, the contents of IP is automatically increased by
+   the length of that command so that IP will then point correctly to the next
+   command to be executed. Examination of the IP register before the execution
+   cycle. will show the IP pointing to the next command, not the current one.
+   The structure of the three lengths of commands is:
+
+       one byte:        (opcode)
+
+       two bytes:       (opcode)    (reg1 reg2)
+
+       four bytes:      (opcode)    (reg1 reg2)    ((data address))
+
+   where the parentheses indicate byte allocation; one byte for an opcode, one
+   byte for the two, registers (reg1 is in the left four bits, reg in the right
+   four bits), and two bytes for the address (a 16 bit number). The opcodes are
+   numbers from 0 co 30, any other number is an invalid code. The registers are
+   number from one to eleven, one of AX and eleven for FR, in these order:
+      +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+      | AX  | BX  | CX  | DX  | EX  | FX  | DR  | IP  | SR  | SP  | FR  |
+      +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+      |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  | 10  | 11  |
+      +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+
 
 * Footnotes
 
