@@ -6,9 +6,16 @@
 (ns sham.computer
   (:refer-clojure :exclude [pop compare rand peek])
 
+  ;; TODO:
+  ;; 1) Determine if these libraries are useful/needed.
+  ;; 2) If so, require in appropriate modules.
+  ;; (:require [clojure.core.match :as match])
+  (:require [me.raynes.fs :as fs])
+
   (:require sham.base-register)
   (:refer sham.base-register :only
-          [sham-registers rand peek poke register register-code neg add-1 sub-1 plus minus times divided-by])
+          [sham-registers rand peek poke register register-code register-names
+           neg add-1 sub-1 plus minus times divided-by])
 
   (:require sham.memory)
   (:refer sham.memory :only [memory peek-byte poke-byte peek-word poke-word])
@@ -22,6 +29,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def compare-reg sham.base-register/compare)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(doseq [name (register-names) ]
+  (intern *ns* (symbol name) (register-code name)))
 
 
 (def ^:private memory-size 32 ; (* 32 1024)
@@ -48,7 +58,7 @@
 
 (defn random
   [regs]
-  (poke regs (register-code "ax") (rand)))
+  (poke regs ax (rand)))
 
 (defn return
   [& args]
@@ -104,7 +114,6 @@
 
 (defn move
   [regs n1 n2]
-  ;;(not-implemented "move")
   (poke regs n1 (peek regs n2)))
 
 (defn add
@@ -134,7 +143,7 @@
 (defn compare
   [regs r1 r2]
   (poke regs
-        (register-code "fr")
+        fr
         (compare-reg r1 r2)))
 
 (defn in
@@ -211,7 +220,7 @@
 
 (defn testandset
   [& args]
-  (nop)
+  (nop))
 
 (defn -testandset
   [& args]
@@ -258,16 +267,16 @@
   "Get current ip, next ip, operands, if any, update prior-ip and registers."
   [registers ram]
   (let [f #(peek registers %)
-        code (-> "ip" register-code)
-        ip (-> code f :value)
-        op (peek-byte ram (int ip))
+        ;; code (-> "ip" register-code)
+        code (ip register-code)
+        ;; ip (-> code f :value)
+        ;; op (peek-byte ram (int ip))
+        op (peek-byte ram ip)
         zone (code-zone ip)
         next-ip (byte (+ ip zone))]
     (reset! prior-ip ip)
     (poke registers code (register next-ip))
-    {:ip ip :opcode op :operands ((fetch-table zone) ram ip)}
-    )
-  )
+    {:ip ip :opcode op :operands ((fetch-table zone) ram ip)}))
 
 (defn startup
   "Entry point for the SHAM computer."
@@ -277,7 +286,6 @@
     )
   (println registers)
   (end-run))
-
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

@@ -3,15 +3,27 @@
 ;; date:  2019-Jun-15
 
 (ns sham.core
+  (:require clojure.core.match)
   (:require sham.computer)
   (:refer sham.computer :only [startup])
+
+  ;;(:import [java.io File])  #1
+
+  (:require [me.raynes.fs :as fs])
   )
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
 
-  (startup)
+  ;;(println (File. ".")) #1
+
+  ;;(startup)
+
+  ;;(println (fs/file ".c"))
+
+  (prn fs/*cwd*)
+
 
   )
 

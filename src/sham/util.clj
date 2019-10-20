@@ -8,10 +8,24 @@
 (ns sham.util
   (:refer clojure.string :only [lower-case]))
 
+(def ^:private MIN-NUMBER -32767)
+(def ^:private MAX-NUMBER 32767)
+
+(def ^:private signature-size 8)
+(def ^:private signature-keys [:rom :binary :disk :tape])
+(def ^:private sham-files ["SHAM.ROM" "SHAM.STM" "SHAM.DSK" "SHAM.TXT"])
+(def ^:private signatures
+  (zipmap signature-keys (map vec sham-files)))
+
 (defn atom?
   "Is x an instance of Atom?"
   [x]
   (= (class x) clojure.lang.Atom))
+
+(defn ref?
+  "Is x an instance of Ref?"
+  [x]
+  (= (class x) clojure.lang.Ref))
 
 (defn code
   "Finds a given name in a given collection, returns its code/index,
@@ -23,6 +37,13 @@
       idx
       (throw (java.lang.IllegalArgumentException.
               (str "No such " kind " '" name "'"))))))
+
+(defn legal-number?
+  "Is n a legal number in the SHAM system?"
+  [n]
+  (and (int? n)
+       (<= MIN-NUMBER n MAX-NUMBER)))
+
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

@@ -3,7 +3,7 @@
 ;; date:  2019-Jun-07
 
 (ns sham.base-register
-  (:refer-clojure :exclude [name compare rand])
+  (:refer-clojure :exclude [name compare rand peek])
 
   (:refer clojure.string :only [lower-case])
 
@@ -18,7 +18,7 @@
   "Alias the \"type name\", hiding implementation details."
   :sham.register.impl/Register)
 
-(def ^:private register-names ["nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr"])
+(def ^:private _register-names ["nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr"])
 
 (def ^:private max-rand (Math/pow 2 16))
 
@@ -37,11 +37,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(def register-code (partial code register-names "register"))
+(def register-code (partial code _register-names "register"))
 
 (defn sham-registers
   []
-  (registers register-names))
+  (registers _register-names))
+
+(defn register-names
+  "Provide a copy of the valid register names."
+  []
+  _register-names)
 
 (defn- check-fn
   "Dispatch function for register operation multimethods."

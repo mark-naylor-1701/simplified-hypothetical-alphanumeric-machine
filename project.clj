@@ -3,7 +3,9 @@
   :url "https://github.com/mark-naylor-1701/simplified-hypothetical-alphanumeric-machine"
   :license {:name "BSD 3-Clause License"
             :url "https://opensource.org/licenses/BSD-3-Clause"}
-  :dependencies [[org.clojure/clojure "1.10.0"]]
+  :dependencies [[org.clojure/clojure "1.10.0"]
+                 [org.clojure/core.match "0.3.0"]
+                 [me.raynes/fs "1.4.6"]]
   :main ^:skip-aot sham.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
