@@ -3,13 +3,13 @@
 ;; date:  2019-Aug-12
 
 (ns sham.memory
-  (:use [sham.util :only [atom?]]))
+  (:use [sham.util :only [ref?]]))
 
 (defn memory
   "Initializes a memory bank of given size to zeros."
   [size-in-bytes]
   {:pre [(number? size-in-bytes)]}
-  (atom (vec (repeat size-in-bytes (byte 0)))))
+  (ref (vec (repeat size-in-bytes (byte 0)))))
 
 (defn- byte?
   "Is x of type byte?"
@@ -20,7 +20,7 @@
 (defn- memory-bank?
   "Is x a collection of bytes?"
   [x]
-  (and (atom? x)
+  (and (ref? x)
        (every? byte? (deref x))))
 
 

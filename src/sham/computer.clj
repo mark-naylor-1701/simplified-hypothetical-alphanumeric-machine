@@ -37,7 +37,7 @@
 (def ^:private memory-size 32 ; (* 32 1024)
   )
 
-(def prior-ip (atom 0))
+(def prior-ip (ref 0))
 
 (def registers (sham-registers))
 

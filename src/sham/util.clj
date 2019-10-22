@@ -41,8 +41,8 @@
 (defn legal-number?
   "Is n a legal number in the SHAM system?"
   [n]
-  (and (int? n)
-       (<= MIN-NUMBER n MAX-NUMBER)))
+  {:pre [(int? n)]}
+  (<= MIN-NUMBER n MAX-NUMBER))
 
 
 ;;------------------------------------------------------------------------------

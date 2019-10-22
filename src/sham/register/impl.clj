@@ -4,7 +4,7 @@
 (ns sham.register.impl
   (:refer-clojure :exclude [peek])
   (:use [clojure.string :only [lower-case]])
-  (:use [sham.util :only [atom?]]))
+  (:use [sham.util :only [ref?]]))
 
 
 (defn register
@@ -27,14 +27,23 @@
   (let [n (if (coll? spec)
             (count spec)
             spec)]
-    (atom (vec (repeat n (register 0))))))
+    (ref (vec (repeat n (register 0))))))
+
+;; (defn- register-bank?
+;;   ""
+;;   [x]
+;;   (and (ref? x)
+;;        (coll? (deref x))
+;;        (every? register? (deref x))))
 
 (defn- register-bank?
   ""
   [x]
-  (and (atom? x)
-       (coll? (deref x))
-       (every? register? (deref x))))
+  (when (ref? x)
+    (let [x (deref x)]
+      (and (coll? x)
+           (every? register? x)))))
+
 
 (defn peek
   "Get a selected register"

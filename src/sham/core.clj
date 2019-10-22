@@ -18,11 +18,11 @@
 
   ;;(println (File. ".")) #1
 
-  ;;(startup)
+  (startup)
 
   ;;(println (fs/file ".c"))
 
-  (prn fs/*cwd*)
+  ;;(prn fs/*cwd*)
 
 
   )
