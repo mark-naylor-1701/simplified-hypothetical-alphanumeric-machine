@@ -18,7 +18,18 @@
   "Alias the \"type name\", hiding implementation details."
   :sham.register.impl/Register)
 
-(def ^:private _register-names ["nx" "ax" "bx" "cx" "dx" "ex" "fx" "dr" "ip" "sr" "sp" "fr"])
+(def ^:private faux-register-names
+  ["lx" "nx"])
+
+(def ^:private documented-register-names
+  ["ax" "bx" "cx" "dx" "fx" "dr" "ip" "sr" "sp" "fr"])
+
+(def ^:private reserved-names
+  ["LOW" "EQUAL" "HIGH" "KEY"])
+
+(def ^:private _register-names
+  (vec (concat faux-register-names documented-register-names reserved-names)))
+
 
 (def ^:private max-rand (Math/pow 2 16))
 

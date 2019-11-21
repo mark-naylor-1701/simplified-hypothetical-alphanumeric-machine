@@ -27,7 +27,7 @@
   (let [n (if (coll? spec)
             (count spec)
             spec)]
-    (ref (vec (repeat n (register 0))))))
+    (vec (repeat n (register 0)))))
 
 ;; (defn- register-bank?
 ;;   ""
@@ -39,18 +39,15 @@
 (defn- register-bank?
   ""
   [x]
-  (when (ref? x)
-    (let [x (deref x)]
-      (and (coll? x)
-           (every? register? x)))))
-
+  (and (coll? x)
+       (every? register? x)))
 
 (defn peek
   "Get a selected register"
   [obj idx]
   {:pre [(register-bank? obj)
          (number? idx)]}
-  ((deref obj) idx))
+  (obj idx))
 
 (defn poke
   "Set a selected register"
@@ -58,7 +55,7 @@
   {:pre [(register-bank? obj)
          (number? idx)
          (register? reg)]}
-  (swap! obj assoc idx reg))
+  (assoc obj idx reg))
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License

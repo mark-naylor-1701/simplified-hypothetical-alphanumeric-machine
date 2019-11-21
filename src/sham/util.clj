@@ -8,8 +8,8 @@
 (ns sham.util
   (:refer clojure.string :only [lower-case]))
 
-(def ^:private MIN-NUMBER -32767)
-(def ^:private MAX-NUMBER 32767)
+(def MIN-NUMBER -32767)
+(def MAX-NUMBER 32767)
 
 (def ^:private signature-size 8)
 (def ^:private signature-keys [:rom :binary :disk :tape])
@@ -17,6 +17,7 @@
 (def ^:private signatures
   (zipmap signature-keys (map vec sham-files)))
 
+;; TODO: Remove function.
 (defn atom?
   "Is x an instance of Atom?"
   [x]
@@ -26,6 +27,7 @@
   "Is x an instance of Ref?"
   [x]
   (= (class x) clojure.lang.Ref))
+
 
 (defn code
   "Finds a given name in a given collection, returns its code/index,

@@ -26,15 +26,12 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  Mappings to implementation functions.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def compare-reg sham.base-register/compare)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO: Restore memory-size after testing is complete.
 
-(doseq [name (register-names) ]
-  (intern *ns* (symbol name) (register-code name)))
-
-
-(def ^:private memory-size 32 ; (* 32 1024)
+(def ^:private memory-size 128 ; (* 32 1024)
   )
 
 (def prior-ip (ref 0))
@@ -58,7 +55,7 @@
 
 (defn random
   [regs]
-  (poke regs ax (rand)))
+  (poke regs (register-code "ax") (rand)))
 
 (defn return
   [& args]
@@ -143,7 +140,7 @@
 (defn compare
   [regs r1 r2]
   (poke regs
-        fr
+        (register-code "fr")
         (compare-reg r1 r2)))
 
 (defn in
@@ -267,15 +264,16 @@
   "Get current ip, next ip, operands, if any, update prior-ip and registers."
   [registers ram]
   (let [f #(peek registers %)
-        ;; code (-> "ip" register-code)
-        code (ip register-code)
+        ip (-> "ip" register-code)
+        ;;code (ip register-code)
         ;; ip (-> code f :value)
         ;; op (peek-byte ram (int ip))
         op (peek-byte ram ip)
         zone (code-zone ip)
         next-ip (byte (+ ip zone))]
-    (reset! prior-ip ip)
-    (poke registers code (register next-ip))
+    (dosync
+     (ref-set prior-ip ip)
+     (poke registers ip (register next-ip)))
     {:ip ip :opcode op :operands ((fetch-table zone) ram ip)}))
 
 (defn startup
@@ -283,8 +281,13 @@
   []
   (let [ram (memory memory-size)]
     (println ram)
-    )
-  (println registers)
+
+    (println registers)
+
+     (let [operation (fetch registers ram)])
+
+    ) ;let
+
   (end-run))
 
 ;;------------------------------------------------------------------------------

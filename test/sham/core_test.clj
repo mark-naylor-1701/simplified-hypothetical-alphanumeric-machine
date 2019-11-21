@@ -5,4 +5,4 @@
 
 (deftest a-test
   (testing "FIXME, I fail."
-    (is true)))
+    (is false)))
