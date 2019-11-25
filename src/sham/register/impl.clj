@@ -29,12 +29,6 @@
             spec)]
     (vec (repeat n (register 0)))))
 
-;; (defn- register-bank?
-;;   ""
-;;   [x]
-;;   (and (ref? x)
-;;        (coll? (deref x))
-;;        (every? register? (deref x))))
 
 (defn- register-bank?
   ""

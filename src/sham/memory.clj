@@ -9,7 +9,7 @@
   "Initializes a memory bank of given size to zeros."
   [size-in-bytes]
   {:pre [(number? size-in-bytes)]}
-  (ref (vec (repeat size-in-bytes (byte 0)))))
+  (vec (repeat size-in-bytes (byte 0))))
 
 (defn- byte?
   "Is x of type byte?"
@@ -20,17 +20,17 @@
 (defn- memory-bank?
   "Is x a collection of bytes?"
   [x]
-  (and (ref? x)
-       (every? byte? (deref x))))
+  (and (coll? x)
+       (every? byte? x)))
 
 
 (defn peek-byte
-  "Return a byte from a memory bank at the given offset."
+  "Return a byte from a memory bank at the given offset, nil if access
+  attempted above upper boundary."
   [obj idx]
   {:pre [(memory-bank? obj)
-         (number? idx)
-         (< -1 idx (count (deref obj)))]}
-  ((deref obj) idx))
+         (number? idx)]}
+  (get obj idx))
 
 (defn poke-byte
   "Puts a byte into a memory bank at the given offset."
@@ -38,20 +38,22 @@
   {:pre [(memory-bank? obj)
          (number? idx)
          (number? n)
-         (< -1 idx (count (deref obj)))]}
-  (swap! obj assoc idx (unchecked-byte n)))
+         (< -1 idx (count obj))]}
+  (assoc obj idx (unchecked-byte n)))
 
 (defn peek-word
-  "Return a word from a memory bank at the given offset."
+  "Return a word from a memory bank at the given offset, nil if access
+  attempted above upper boundary."
   [obj idx]
   {:pre [(memory-bank? obj)
          (number? idx)
-         (>= idx 0)
-         (< (inc idx) (count (deref obj)))]}
-  (let [dobj (deref obj)]
-    (bit-or
-     (bit-shift-left (dobj idx) 8)
-     (dobj (inc idx)))))
+         (>= idx 0)]}
+  (let [hi (get obj idx)
+        lo (get obj (inc idx))]
+    (when (every? byte? [hi lo])
+      (bit-or
+       (bit-shift-left hi 8)
+       lo))))
 
 (defn poke-word
   "Puts a word into a memory bank at the given offset."
@@ -59,12 +61,25 @@
   {:pre [(memory-bank? obj)
          (number? idx)
          (number? n)
-         (< -1 idx (count (deref obj)))]}
+         (< -1 idx (count obj))]}
   (let [idx+ (inc idx)
         lo (unchecked-byte n)
         hi (unchecked-byte (bit-shift-right (unchecked-short n) 8))]
-    (swap! obj assoc idx hi)
-    (swap! obj assoc idx+ lo)))
+    (assoc obj idx hi)
+    (assoc obj (inc idx) lo)))
+
+
+;; TODO: Possibly move to the `computer' module, as memory doesn't
+;; care about its contents. The interpretation of what the bytes
+;; represent is a higher abstraction. Keep it here for now because it
+;; is working. (REPL testing only.)
+(defn fetch-instruction
+  "Fetch the instuction byte, the registers byte, and the address byte
+  from memory."
+  [obj idx]
+  [(peek-byte obj idx)
+   (peek-byte obj (inc idx))
+   (peek-word obj (-> idx inc inc))])
 
 ;;------------------------------------------------------------------------------
 ;; BSD 3-Clause License
