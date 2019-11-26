@@ -16,14 +16,13 @@
   [x]
   (= Byte (class x)))
 
-
 (defn- memory-bank?
   "Is x a collection of bytes?"
   [x]
   (and (coll? x)
        (every? byte? x)))
 
-
+;; Byte operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn peek-byte
   "Return a byte from a memory bank at the given offset, nil if access
   attempted above upper boundary."
@@ -41,6 +40,7 @@
          (< -1 idx (count obj))]}
   (assoc obj idx (unchecked-byte n)))
 
+;; Word operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn peek-word
   "Return a word from a memory bank at the given offset, nil if access
   attempted above upper boundary."
@@ -73,6 +73,7 @@
 ;; care about its contents. The interpretation of what the bytes
 ;; represent is a higher abstraction. Keep it here for now because it
 ;; is working. (REPL testing only.)
+;; Instruction ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn fetch-instruction
   "Fetch the instuction byte, the registers byte, and the address byte
   from memory."

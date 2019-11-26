@@ -66,6 +66,7 @@
                Number
                (type p2))])
 
+;; Addtition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmulti plus "Add either a number or register to register."  check-fn)
 
 (defmethod plus [Register Number] [r1 r2]
@@ -74,6 +75,7 @@
 (defmethod plus [Register Register] [r1 r2]
   (register (apply +' (map :value [r1 r2]))))
 
+;; Subtraction ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmulti minus "Subtract either a number or register to register."  check-fn)
 
 (defmethod minus [Register Number] [r1 r2]
@@ -82,6 +84,7 @@
 (defmethod minus [Register Register] [r1 r2]
   (register (apply -' (map :value [r1 r2]))))
 
+;; Multiplication ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmulti times "Muliply either a number or register to register."  check-fn)
 
 (defmethod times [Register Number] [r1 r2]
@@ -90,6 +93,7 @@
 (defmethod times [Register Register] [r1 r2]
   (register (apply *' (map :value [r1 r2]))))
 
+;; Division ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmulti divided-by "Divide either a number or register to register."  check-fn)
 
 (defmethod divided-by [Register Number] [r1 r2]
@@ -98,11 +102,13 @@
 (defmethod divided-by [Register Register] [r1 r2]
   (register (apply / (map :value [r1 r2]))))
 
+;; Negation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmulti neg "Negate (* -1) either a register or number?" type)
 
 (defmethod neg Register [r]
   (register (* -1 (:value r))))
 
+;; Increment and decrement ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmulti add-1 "Increment a register" type)
 
 (defmethod add-1  Register [r]
@@ -115,6 +121,7 @@
 
 (defmulti compare "Compares two registers or a register and a number" check-fn)
 
+;; Comparison ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmethod compare [Register Number] [r1 r2]
   (register (clojure.core/compare (:value r1) r2)))
 

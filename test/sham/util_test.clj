@@ -18,10 +18,7 @@
 
     (is (not-legal? (inc MAX-NUMBER)))
     (is (not-legal? (dec MIN-NUMBER)))
-    ;; (is (not (legal-number? (inc MAX-NUMBER))))
-    ;; (is (not (legal-number? (dec MIN-NUMBER))))
 
     (is (thrown? java.lang.AssertionError (legal-number? 'apple)))	; Because it's a symbol.
     (is (thrown? java.lang.AssertionError (legal-number? "apple")))	; Because it's a string.
-
     ))
